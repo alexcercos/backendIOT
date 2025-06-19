@@ -1,0 +1,375 @@
+import psycopg2
+from psycopg2 import sql
+
+DB_CONFIG = {
+    "dbname" : "sjk007",
+    "user" : "postgres",
+    "password" : "admin",
+    "host" : "localhost",
+    "port" : "5432"
+}
+
+
+def connect():
+    try:
+        conn = psycopg2.connect(**DB_CONFIG)
+        cursor = conn.cursor()
+        return conn, cursor
+    except Exception as e:
+        print(f"Error connecting to database: {e}")
+        return None, None
+
+
+def query(table):
+    conn, cursor = connect()
+    if not conn:
+        return None
+    try:
+        query = sql.SQL("SELECT * FROM {table_name}").format(table_name=sql.Identifier(table))
+        cursor.execute(query)
+        columns = [desc[0] for desc in cursor.description]
+        result = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        return result
+    except Exception as e:
+        print(f"Error executing query: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_patient_info(user):
+    conn, cursor = connect()
+    if not conn:
+        return None
+    try:
+        query = sql.SQL("SELECT * FROM patient WHERE id = %s")
+        cursor.execute(query, (user,))
+        columns = [desc[0] for desc in cursor.description]
+        result = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        return result
+    except Exception as e:
+        print(f"Error executing query: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_session_info(session):
+    conn, cursor = connect()
+    if not conn:
+        return None
+    try:
+        query = sql.SQL("SELECT * FROM sessions WHERE id = %s")
+        cursor.execute(query, (session,))
+        columns = [desc[0] for desc in cursor.description]
+        result = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        return result
+    except Exception as e:
+        print(f"Error executing query: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_exercise_info(exercise):
+    conn, cursor = connect()
+    if not conn:
+        return None
+    try:
+        query = sql.SQL("SELECT * FROM exercise WHERE id = %s")
+        cursor.execute(query, (exercise,))
+        columns = [desc[0] for desc in cursor.description]
+        result = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        return result
+    except Exception as e:
+        print(f"Error executing query: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_user_sessions(user):
+    conn, cursor = connect()
+    if not conn:
+        return None
+    try:
+        query = sql.SQL("SELECT * FROM sessions WHERE user_id = %s")
+        cursor.execute(query, (user,))
+        columns = [desc[0] for desc in cursor.description]
+        result = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        return result
+    except Exception as e:
+        print(f"Error executing query: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_session_exercises(session):
+    conn, cursor = connect()
+    if not conn:
+        return None
+    try:
+        query = sql.SQL("SELECT * FROM session_exercise WHERE session_id = %s")
+        cursor.execute(query, (session,))
+        columns = [desc[0] for desc in cursor.description]
+        result = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        return result
+    except Exception as e:
+        print(f"Error executing query: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_pox(session_exercise):
+    conn, cursor = connect()
+    if not conn:
+        return None
+    try:
+        query = sql.SQL("SELECT * FROM pox_data WHERE session_exercise_id = %s")
+        cursor.execute(query, (session_exercise,))
+        columns = [desc[0] for desc in cursor.description]
+        result = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        return result
+    except Exception as e:
+        print(f"Error executing query: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_kinect(session_exercise):
+    conn, cursor = connect()
+    if not conn:
+        return None
+    try:
+        query = sql.SQL("SELECT * FROM kinect_data WHERE session_exercise_id = %s")
+        cursor.execute(query, (session_exercise,))
+        columns = [desc[0] for desc in cursor.description]
+        result = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        return result
+    except Exception as e:
+        print(f"Error executing query: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
+def create_user(username, password, user_type, other_data):
+    conn, cursor = connect()
+    if not conn:
+        return None
+    try:
+        query = sql.SQL("INSERT INTO users(username, password) VALUES (%s, %s) RETURNING id")
+        cursor.execute(query, (username, password))
+        user_id = cursor.fetchone()[0]
+        if user_type == "Patient":
+            query2 = sql.SQL("INSERT INTO patient(id, age, height, weight, therapist_id) VALUES (%s, %s, %s, %s, %s)")
+            cursor.execute(query2, (user_id, other_data["age"], other_data["height"], other_data["weight"], other_data["therapist_id"]))
+        else:
+            query2 = sql.SQL("INSERT INTO therapist(id) VALUES (%s)")
+            cursor.execute(query2, (user_id,))
+        conn.commit()
+        return True
+    except Exception as e:
+        print(f"Error executing query: {e}")
+        return False 
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def create_exercise(data):
+    conn, cursor = connect()
+    if not conn:
+        return None
+    try:
+        query = sql.SQL("""INSERT INTO exercise(
+                        name, description
+                        ) 
+                        VALUES (%s, %s)
+                        """)
+        cursor.execute(query, (
+            data.get("name"),
+            data.get("description")
+        ))
+        conn.commit()
+        return True
+    except Exception as e:
+        print(f"Error executing query: {e}")
+        return False 
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def create_session(user_id, start_time, end_time):
+    conn, cursor = connect()
+    if not conn:
+        return None
+    try:
+        query = sql.SQL("INSERT INTO sessions(user_id, start_time, end_time) VALUES (%s, %s, %s) RETURNING id")
+        id = cursor.fetchone()[0]
+        cursor.execute(query, (user_id, start_time, end_time))
+        conn.commit()
+        return id
+    except Exception as e:
+        print(f"Error executing query: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def add_exercise(session_id, exercise_id, date):
+    conn, cursor = connect()
+    if not conn:
+        return None
+    try:
+        if date is None:
+            query = sql.SQL("INSERT INTO session_exercise(session_id, exercise_id, mean_heart_rate, mean_breath_rate) VALUES (%s, %s, %s, %s) RETURNING id")
+            cursor.execute(query, (session_id, exercise_id, 0, 0))
+        else:
+            query = sql.SQL("INSERT INTO session_exercise(session_id, exercise_id, mean_heart_rate, mean_breath_rate, date) VALUES (%s, %s, %s, %s, %s) RETURNING id")
+            cursor.execute(query, (session_id, exercise_id, 0, 0, date))
+        id = cursor.fetchone()[0]
+        conn.commit()
+        return id
+    except Exception as e:
+        print(f"Error executing query: {e}")
+        return None 
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def add_pox(data):
+    conn, cursor = connect()
+    if not conn:
+        return None
+    try:
+        query = sql.SQL("""
+            INSERT INTO pox_data(
+                ts, session_exercise_id, total_phase, breath_phase, heart_phase,
+                breath_rate, heart_rate, distance
+            ) VALUES (
+                %s, %s, %s, %s, %s,
+                %s, %s, %s
+            )
+        """)
+        
+        values = (
+            data.get("timestamp"),
+            data.get("session_exercise"),
+            data.get("total_phase"),
+            data.get("breath_phase"),
+            data.get("heart_phase"),
+            data.get("breath_rate"),
+            data.get("heart_rate"),
+            data.get("distance")
+        )
+
+        cursor.execute(query, values)
+        conn.commit()
+        return True
+    except Exception as e:
+        print(f"Error executing query: {e}")
+        return False
+    finally:
+        cursor.close()
+        conn.close()
+
+def add_kinect(data):
+    conn, cursor = connect()
+    if not conn:
+        return None
+    try:
+        query = sql.SQL("""
+            INSERT INTO kinect_data(
+                ts, session_exercise_id,
+                spine_base, spine_mid, neck, head,
+                shoulder_left, elbow_left, wrist_left, hand_left,
+                shoulder_right, elbow_right, wrist_right, hand_right,
+                hip_left, knee_left, ankle_left, foot_left,
+                hip_right, knee_right, ankle_right, foot_right, spine_shoulder,
+                completness, instability
+            ) VALUES (
+                %s, %s, 
+                %s, %s, %s, %s,
+                %s, %s, %s, %s,
+                %s, %s, %s, %s,
+                %s, %s, %s, %s,
+                %s, %s, %s, %s, %s,
+                %s, %s
+            )
+        """)
+        
+        values = (
+            data.get("timestamp"),
+            data.get("session_exercise"),
+            data.get("spine_base"),
+            data.get("spine_mid"),
+            data.get("neck"),
+            data.get("head"),
+            data.get("shoulder_left"),
+            data.get("elbow_left"),
+            data.get("wrist_left"),
+            data.get("hand_left"),
+            data.get("shoulder_right"),
+            data.get("elbow_right"),
+            data.get("wrist_right"),
+            data.get("hand_right"),
+            data.get("hip_left"),
+            data.get("knee_left"),
+            data.get("ankle_left"),
+            data.get("foot_left"),
+            data.get("hip_right"),
+            data.get("knee_right"),
+            data.get("ankle_right"),
+            data.get("foot_right"),
+            data.get("spine_shoulder"),
+            data.get("completness"),
+            data.get("instability"),
+        )
+
+        cursor.execute(query, values)
+        conn.commit()
+        return True
+    except Exception as e:
+        print(f"Error executing query: {e}")
+        return False
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def set_metrics(session_exercise, mean_hr, mean_br):
+    conn, cursor = connect()
+    if not conn:
+        return None
+    try:
+        query = sql.SQL("UPDATE session_exercise SET mean_heart_rate = %s, mean_breath_rate = %s WHERE id = %s")
+        cursor.execute(query, (mean_hr, mean_br, session_exercise))
+        conn.commit()
+        return True
+    except Exception as e:
+        print(f"Error executing query: {e}")
+        return False 
+    finally:
+        cursor.close()
+        conn.close()
+
+if __name__ == "__main__":
+    conn, cursor = connect()
+    if conn:
+        cursor.execute("SELECT version();")
+        print("PostgreSQL version:", cursor.fetchone())
+        conn.close()
