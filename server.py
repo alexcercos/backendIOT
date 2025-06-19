@@ -36,8 +36,9 @@ def get_current_exercise():
 def set_current_exercise():
     r = request.get_json()
     user_id = r.get("user_id")
-    exercise = r.get("exercise")
-    current_exercises[user_id] = exercise
+    exercise_id = r.get("exercise_id")
+    set_id = r.get("set_id")
+    current_exercises[user_id] = {"exercise" : exercise_id, "set_id" : set_id}
     return jsonify({"message" : "Exercise set"}), 200
 
 
@@ -96,11 +97,11 @@ def get_user_sessions():
         return jsonify({'error': 'Database query failed'}), 500
     
 
-@app.route('/sessionExercises', methods=['GET'])
-def get_session_exercises():
+@app.route('/sets', methods=['GET'])
+def get_sets():
     r = request.get_json()
     session = r.get("session_id")
-    data = db.get_session_exercises(session)
+    data = db.get_sets(session)
     if data:
         return jsonify(data), 200
     else:
@@ -110,8 +111,8 @@ def get_session_exercises():
 @app.route('/poxExercise', methods=['GET'])
 def get_pox_from_exercise():
     r = request.get_json()
-    session_exercise = r.get("session_exercise_id")
-    data = db.get_pox(session_exercise)
+    set_id = r.get("set_id")
+    data = db.get_pox(set_id)
     if data:
         return jsonify(data), 200
     else:
@@ -121,8 +122,8 @@ def get_pox_from_exercise():
 @app.route('/kinectExercise', methods=['GET'])
 def get_kinect_from_exercise():
     r = request.get_json()
-    session_exercise = r.get("session_exercise_id")
-    data = db.get_kinect(session_exercise)
+    set_id = r.get("set_id")
+    data = db.get_kinect(set_id)
     if data:
         return jsonify(data), 200
     else:
@@ -185,12 +186,12 @@ def add_exercise():
 @app.route('/setMetrics', methods=['POST'])
 def set_metrics():
     r = request.get_json()
-    session_exercise = r.get("session_exercise")
-    data = db.get_pox(session_exercise)
+    set_id = r.get("set_id")
+    data = db.get_pox(set_id)
     if len(data) > 0:
         mean_hr = sum(d["heart_rate"] for d in data) / len(data)
         mean_br = sum(d["breath_rate"] for d in data) / len(data)
-        if db.set_metrics(session_exercise, mean_hr, mean_br):
+        if db.set_metrics(set_id, mean_hr, mean_br):
             return jsonify({'message': 'Metrics set successfully'}), 201
         else:
             return jsonify({'error': 'Data insertion failed'}), 500

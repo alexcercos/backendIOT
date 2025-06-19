@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS sessions (
     end_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS session_exercise (
+CREATE TABLE IF NOT EXISTS sets (
     id SERIAL PRIMARY KEY,
     session_id INT REFERENCES sessions(id) ON DELETE CASCADE,
     exercise_id INT REFERENCES exercise(id) ON DELETE RESTRICT,
@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS session_exercise (
 CREATE TABLE IF NOT EXISTS pox_data (
     id SERIAL PRIMARY KEY,
     ts FLOAT NOT NULL,
-    session_exercise_id INT REFERENCES session_exercise(id) ON DELETE CASCADE,
+    set_id INT REFERENCES sets(id) ON DELETE CASCADE,
     total_phase FLOAT NOT NULL,
     breath_phase FLOAT NOT NULL,
     heart_phase FLOAT NOT NULL,
@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS pox_data (
 CREATE TABLE IF NOT EXISTS kinect_data (
     id SERIAL PRIMARY KEY,
     ts FLOAT NOT NULL,
-    session_exercise_id INT REFERENCES session_exercise(id) ON DELETE CASCADE,
+    set_id INT REFERENCES sets(id) ON DELETE CASCADE,
     spine_base VARCHAR(100) NOT NULL,
     spine_mid VARCHAR(100) NOT NULL,
     neck VARCHAR(100) NOT NULL,
@@ -82,5 +82,28 @@ CREATE TABLE IF NOT EXISTS kinect_data (
     instability FLOAT NOT NULL
 );
 
-/* insert exercise names,description*/
-/* insert users */
+WITH
+    new_therapist AS (
+        INSERT INTO users(username, password)
+        VALUES ('therapist', 'therapist')
+        RETURNING id
+    ),
+    new_patient AS (
+        INSERT INTO users(username, password)
+        VALUES ('patient', 'patient')  -- ojo: corregí "patiemt"
+        RETURNING id
+    )
+
+INSERT INTO therapist(id)
+SELECT id FROM new_therapist;
+
+INSERT INTO patient(id, age, height, weight, therapist_id)
+SELECT new_patient.id, 25, 170, 70, new_therapist.id
+FROM new_patient, new_therapist;
+
+INSERT INTO exercise(name, description) VALUES('biceps_right', 'biceps_right');
+INSERT INTO exercise(name, description) VALUES('biceps_left', 'biceps_left');
+INSERT INTO exercise(name, description) VALUES('quad_right', 'quad_right');
+INSERT INTO exercise(name, description) VALUES('quad_left', 'quad_left');
+INSERT INTO exercise(name, description) VALUES('triceps_right', 'triceps_right');
+INSERT INTO exercise(name, description) VALUES('triceps_left', 'triceps_left');

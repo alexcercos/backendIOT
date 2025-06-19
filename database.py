@@ -110,12 +110,12 @@ def get_user_sessions(user):
         conn.close()
 
 
-def get_session_exercises(session):
+def get_sets(session):
     conn, cursor = connect()
     if not conn:
         return None
     try:
-        query = sql.SQL("SELECT * FROM session_exercise WHERE session_id = %s")
+        query = sql.SQL("SELECT * FROM sets WHERE session_id = %s")
         cursor.execute(query, (session,))
         columns = [desc[0] for desc in cursor.description]
         result = [dict(zip(columns, row)) for row in cursor.fetchall()]
@@ -128,13 +128,13 @@ def get_session_exercises(session):
         conn.close()
 
 
-def get_pox(session_exercise):
+def get_pox(set_id):
     conn, cursor = connect()
     if not conn:
         return None
     try:
-        query = sql.SQL("SELECT * FROM pox_data WHERE session_exercise_id = %s")
-        cursor.execute(query, (session_exercise,))
+        query = sql.SQL("SELECT * FROM pox_data WHERE set_id = %s")
+        cursor.execute(query, (set_id,))
         columns = [desc[0] for desc in cursor.description]
         result = [dict(zip(columns, row)) for row in cursor.fetchall()]
         return result
@@ -146,13 +146,13 @@ def get_pox(session_exercise):
         conn.close()
 
 
-def get_kinect(session_exercise):
+def get_kinect(set_id):
     conn, cursor = connect()
     if not conn:
         return None
     try:
-        query = sql.SQL("SELECT * FROM kinect_data WHERE session_exercise_id = %s")
-        cursor.execute(query, (session_exercise,))
+        query = sql.SQL("SELECT * FROM kinect_data WHERE set_id = %s")
+        cursor.execute(query, (set_id,))
         columns = [desc[0] for desc in cursor.description]
         result = [dict(zip(columns, row)) for row in cursor.fetchall()]
         return result
@@ -235,10 +235,10 @@ def add_exercise(session_id, exercise_id, date):
         return None
     try:
         if date is None:
-            query = sql.SQL("INSERT INTO session_exercise(session_id, exercise_id, mean_heart_rate, mean_breath_rate) VALUES (%s, %s, %s, %s) RETURNING id")
+            query = sql.SQL("INSERT INTO sets(session_id, exercise_id, mean_heart_rate, mean_breath_rate) VALUES (%s, %s, %s, %s) RETURNING id")
             cursor.execute(query, (session_id, exercise_id, 0, 0))
         else:
-            query = sql.SQL("INSERT INTO session_exercise(session_id, exercise_id, mean_heart_rate, mean_breath_rate, date) VALUES (%s, %s, %s, %s, %s) RETURNING id")
+            query = sql.SQL("INSERT INTO sets(session_id, exercise_id, mean_heart_rate, mean_breath_rate, date) VALUES (%s, %s, %s, %s, %s) RETURNING id")
             cursor.execute(query, (session_id, exercise_id, 0, 0, date))
         id = cursor.fetchone()[0]
         conn.commit()
@@ -258,7 +258,7 @@ def add_pox(data):
     try:
         query = sql.SQL("""
             INSERT INTO pox_data(
-                ts, session_exercise_id, total_phase, breath_phase, heart_phase,
+                ts, set_id, total_phase, breath_phase, heart_phase,
                 breath_rate, heart_rate, distance
             ) VALUES (
                 %s, %s, %s, %s, %s,
@@ -268,7 +268,7 @@ def add_pox(data):
         
         values = (
             data.get("timestamp"),
-            data.get("session_exercise"),
+            data.get("set_id"),
             data.get("total_phase"),
             data.get("breath_phase"),
             data.get("heart_phase"),
@@ -294,7 +294,7 @@ def add_kinect(data):
     try:
         query = sql.SQL("""
             INSERT INTO kinect_data(
-                ts, session_exercise_id,
+                ts, set_id,
                 spine_base, spine_mid, neck, head,
                 shoulder_left, elbow_left, wrist_left, hand_left,
                 shoulder_right, elbow_right, wrist_right, hand_right,
@@ -314,7 +314,7 @@ def add_kinect(data):
         
         values = (
             data.get("timestamp"),
-            data.get("session_exercise"),
+            data.get("set_id"),
             data.get("spine_base"),
             data.get("spine_mid"),
             data.get("neck"),
@@ -351,13 +351,13 @@ def add_kinect(data):
         conn.close()
 
 
-def set_metrics(session_exercise, mean_hr, mean_br):
+def set_metrics(set_id, mean_hr, mean_br):
     conn, cursor = connect()
     if not conn:
         return None
     try:
-        query = sql.SQL("UPDATE session_exercise SET mean_heart_rate = %s, mean_breath_rate = %s WHERE id = %s")
-        cursor.execute(query, (mean_hr, mean_br, session_exercise))
+        query = sql.SQL("UPDATE sets SET mean_heart_rate = %s, mean_breath_rate = %s WHERE id = %s")
+        cursor.execute(query, (mean_hr, mean_br, set_id))
         conn.commit()
         return True
     except Exception as e:
