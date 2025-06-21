@@ -26,8 +26,7 @@ def send_kinect():
 
 @app.route('/getCurrentExercise', methods=['GET'])
 def get_current_exercise():
-    r = request.get_json()
-    user_id = r.get("user_id")
+    user_id = request.args.get("user_id")
     exercise = current_exercises.get(user_id, -1)
     return jsonify({"current_exercise" : exercise}), 200
 
@@ -44,8 +43,7 @@ def set_current_exercise():
 
 @app.route('/dbGet', methods=['GET'])
 def db_get():
-    r = request.get_json()
-    table = r.get("table")
+    table = request.args.get("table")
     data = db.query(table)
     if data:
         return jsonify(data), 200
@@ -55,8 +53,7 @@ def db_get():
 
 @app.route('/getPatient', methods=['GET'])
 def get_patient():
-    r = request.get_json()
-    user = r.get("user_id")
+    user = request.args.get("user_id")
     data = db.get_patient_info(user)
     if data:
         return jsonify(data), 200
@@ -66,8 +63,7 @@ def get_patient():
 
 @app.route('/getSession', methods=['GET'])
 def get_session():
-    r = request.get_json()
-    session = r.get("session_id")
+    session = request.args.get("session_id")
     data = db.get_session_info(session)
     if data:
         return jsonify(data), 200
@@ -77,8 +73,7 @@ def get_session():
 
 @app.route('/getExercise', methods=['GET'])
 def get_exercise():
-    r = request.get_json()
-    exercise = r.get("exercise_id")
+    exercise = request.args.get("exercise_id")
     data = db.get_exercise_info(exercise)
     if data:
         return jsonify(data), 200
@@ -88,8 +83,7 @@ def get_exercise():
 
 @app.route('/userSessions', methods=['GET'])
 def get_user_sessions():
-    r = request.get_json()
-    user = r.get("user_id")
+    user = request.args.get("user_id")
     data = db.get_user_sessions(user)
     if data:
         return jsonify(data), 200
@@ -99,8 +93,7 @@ def get_user_sessions():
 
 @app.route('/sets', methods=['GET'])
 def get_sets():
-    r = request.get_json()
-    session = r.get("session_id")
+    session = request.args.get("session_id")
     data = db.get_sets(session)
     if data:
         return jsonify(data), 200
@@ -110,8 +103,7 @@ def get_sets():
 
 @app.route('/poxExercise', methods=['GET'])
 def get_pox_from_exercise():
-    r = request.get_json()
-    set_id = r.get("set_id")
+    set_id = request.args.get("set_id")
     data = db.get_pox(set_id)
     if data:
         return jsonify(data), 200
@@ -121,8 +113,7 @@ def get_pox_from_exercise():
 
 @app.route('/kinectExercise', methods=['GET'])
 def get_kinect_from_exercise():
-    r = request.get_json()
-    set_id = r.get("set_id")
+    set_id = request.args.get("set_id")
     data = db.get_kinect(set_id)
     if data:
         return jsonify(data), 200
