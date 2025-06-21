@@ -92,11 +92,12 @@ WITH
         INSERT INTO users(username, password)
         VALUES ('patient', 'patient')  -- ojo: corregí "patiemt"
         RETURNING id
+    ),
+    insert_therapist AS (
+        INSERT INTO therapist(id)
+        SELECT id FROM new_therapist
+        RETURNING id
     )
-
-INSERT INTO therapist(id)
-SELECT id FROM new_therapist;
-
 INSERT INTO patient(id, age, height, weight, therapist_id)
 SELECT new_patient.id, 25, 170, 70, new_therapist.id
 FROM new_patient, new_therapist;
