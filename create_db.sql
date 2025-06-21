@@ -102,9 +102,9 @@ INSERT INTO patient(id, age, height, weight, therapist_id)
 SELECT new_patient.id, 25, 170, 70, new_therapist.id
 FROM new_patient, new_therapist;
 
-INSERT INTO exercise(name, description) VALUES('biceps_right', 'biceps_right');
-INSERT INTO exercise(name, description) VALUES('biceps_left', 'biceps_left');
-INSERT INTO exercise(name, description) VALUES('quad_right', 'quad_right');
-INSERT INTO exercise(name, description) VALUES('quad_left', 'quad_left');
-INSERT INTO exercise(name, description) VALUES('triceps_right', 'triceps_right');
-INSERT INTO exercise(name, description) VALUES('triceps_left', 'triceps_left');
+INSERT INTO exercise(name, description) VALUES('biceps_right', 'Biceps (right)');
+INSERT INTO exercise(name, description) VALUES('biceps_left', 'Biceps (left)');
+INSERT INTO exercise(name, description) VALUES('quad_right', 'Quad (right)');
+INSERT INTO exercise(name, description) VALUES('quad_left', 'Quad (left)');
+INSERT INTO exercise(name, description) VALUES('triceps_right', 'Triceps (right)');
+INSERT INTO exercise(name, description) VALUES('triceps_left', 'Triceps (left)');
