@@ -37,8 +37,7 @@ CREATE TABLE IF NOT EXISTS sets (
     mean_breath_rate FLOAT NOT NULL,
     duration FLOAT NOT NULL,
     reps INT NOT NULL,
-    weight FLOAT,
-    date DATE NOT NULL DEFAULT CURRENT_DATE
+    weight FLOAT
 );
 
 CREATE TABLE IF NOT EXISTS pox_data (
