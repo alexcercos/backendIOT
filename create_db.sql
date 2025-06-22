@@ -44,39 +44,14 @@ CREATE TABLE IF NOT EXISTS pox_data (
     id SERIAL PRIMARY KEY,
     ts FLOAT NOT NULL,
     set_id INT REFERENCES sets(id) ON DELETE CASCADE,
-    total_phase FLOAT NOT NULL,
-    breath_phase FLOAT NOT NULL,
-    heart_phase FLOAT NOT NULL,
     breath_rate FLOAT NOT NULL,
-    heart_rate FLOAT NOT NULL,
-    distance FLOAT NOT NULL
+    heart_rate FLOAT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS kinect_data (
     id SERIAL PRIMARY KEY,
     ts FLOAT NOT NULL,
     set_id INT REFERENCES sets(id) ON DELETE CASCADE,
-    spine_base VARCHAR(100) NOT NULL,
-    spine_mid VARCHAR(100) NOT NULL,
-    neck VARCHAR(100) NOT NULL,
-    head VARCHAR(100) NOT NULL,
-    shoulder_left VARCHAR(100) NOT NULL,
-    elbow_left VARCHAR(100) NOT NULL,
-    wrist_left VARCHAR(100) NOT NULL,
-    hand_left VARCHAR(100) NOT NULL,
-    shoulder_right VARCHAR(100) NOT NULL,
-    elbow_right VARCHAR(100) NOT NULL,
-    wrist_right VARCHAR(100) NOT NULL,
-    hand_right VARCHAR(100) NOT NULL,
-    hip_left VARCHAR(100) NOT NULL,
-    knee_left VARCHAR(100) NOT NULL,
-    ankle_left VARCHAR(100) NOT NULL,
-    foot_left VARCHAR(100) NOT NULL,
-    hip_right VARCHAR(100) NOT NULL,
-    knee_right VARCHAR(100) NOT NULL,
-    ankle_right VARCHAR(100) NOT NULL,
-    foot_right VARCHAR(100) NOT NULL,
-    spine_shoulder VARCHAR(100) NOT NULL,
     completeness FLOAT NOT NULL,
     instability FLOAT NOT NULL
 );

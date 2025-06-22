@@ -259,23 +259,18 @@ def add_pox(data):
     try:
         query = sql.SQL("""
             INSERT INTO pox_data(
-                ts, set_id, total_phase, breath_phase, heart_phase,
-                breath_rate, heart_rate, distance
+                ts, set_id,
+                breath_rate, heart_rate
             ) VALUES (
-                %s, %s, %s, %s, %s,
-                %s, %s, %s
+                %s, %s, %s, %s
             )
         """)
         
         values = (
             data.get("timestamp"),
             data.get("set_id"),
-            data.get("total_phase"),
-            data.get("breath_phase"),
-            data.get("heart_phase"),
             data.get("breath_rate"),
-            data.get("heart_rate"),
-            data.get("distance")
+            data.get("heart_rate")
         )
 
         cursor.execute(query, values)
@@ -296,47 +291,15 @@ def add_kinect(data):
         query = sql.SQL("""
             INSERT INTO kinect_data(
                 ts, set_id,
-                spine_base, spine_mid, neck, head,
-                shoulder_left, elbow_left, wrist_left, hand_left,
-                shoulder_right, elbow_right, wrist_right, hand_right,
-                hip_left, knee_left, ankle_left, foot_left,
-                hip_right, knee_right, ankle_right, foot_right, spine_shoulder,
                 completeness, instability
             ) VALUES (
-                %s, %s, 
-                %s, %s, %s, %s,
-                %s, %s, %s, %s,
-                %s, %s, %s, %s,
-                %s, %s, %s, %s,
-                %s, %s, %s, %s, %s,
-                %s, %s
+                %s, %s, %s, %s
             )
         """)
         
         values = (
             data.get("timestamp"),
             data.get("set_id"),
-            data.get("spine_base"),
-            data.get("spine_mid"),
-            data.get("neck"),
-            data.get("head"),
-            data.get("shoulder_left"),
-            data.get("elbow_left"),
-            data.get("wrist_left"),
-            data.get("hand_left"),
-            data.get("shoulder_right"),
-            data.get("elbow_right"),
-            data.get("wrist_right"),
-            data.get("hand_right"),
-            data.get("hip_left"),
-            data.get("knee_left"),
-            data.get("ankle_left"),
-            data.get("foot_left"),
-            data.get("hip_right"),
-            data.get("knee_right"),
-            data.get("ankle_right"),
-            data.get("foot_right"),
-            data.get("spine_shoulder"),
             data.get("completeness"),
             data.get("instability"),
         )
