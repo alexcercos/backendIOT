@@ -187,38 +187,14 @@ def create_user(username, password, user_type, other_data):
         conn.close()
 
 
-def create_exercise(data):
+def create_session(user_id): #, start_time, end_time):
     conn, cursor = connect()
     if not conn:
         return None
     try:
-        query = sql.SQL("""INSERT INTO exercise(
-                        name, description
-                        ) 
-                        VALUES (%s, %s)
-                        """)
-        cursor.execute(query, (
-            data.get("name"),
-            data.get("description")
-        ))
-        conn.commit()
-        return True
-    except Exception as e:
-        print(f"Error executing query: {e}")
-        return False 
-    finally:
-        cursor.close()
-        conn.close()
-
-
-def create_session(user_id, start_time, end_time):
-    conn, cursor = connect()
-    if not conn:
-        return None
-    try:
-        query = sql.SQL("INSERT INTO sessions(user_id, start_time, end_time) VALUES (%s, %s, %s) RETURNING id")
+        query = sql.SQL("INSERT INTO sessions(user_id) VALUES (%s) RETURNING id")
+        cursor.execute(query, (user_id)) #, start_time, end_time
         id = cursor.fetchone()[0]
-        cursor.execute(query, (user_id, start_time, end_time))
         conn.commit()
         return id
     except Exception as e:
@@ -229,17 +205,19 @@ def create_session(user_id, start_time, end_time):
         conn.close()
 
 
-def add_exercise(session_id, exercise_id, date):
+def add_exercise(session_id, exercise_id, reps, weight):
     conn, cursor = connect()
     if not conn:
         return None
     try:
-        if date is None:
-            query = sql.SQL("INSERT INTO sets(session_id, exercise_id, mean_heart_rate, mean_breath_rate) VALUES (%s, %s, %s, %s) RETURNING id")
-            cursor.execute(query, (session_id, exercise_id, 0, 0))
-        else:
-            query = sql.SQL("INSERT INTO sets(session_id, exercise_id, mean_heart_rate, mean_breath_rate, date) VALUES (%s, %s, %s, %s, %s) RETURNING id")
-            cursor.execute(query, (session_id, exercise_id, 0, 0, date))
+        query = sql.SQL("""
+            INSERT INTO sets(
+                session_id, exercise_id, 
+                mean_heart_rate, mean_breath_rate,
+                duration, reps, weight)
+            VALUES (%s, %s, %s, %s, %s, %s, %s) 
+            RETURNING id""")
+        cursor.execute(query, (session_id, exercise_id, 0, 0, 0, reps, weight))
         id = cursor.fetchone()[0]
         conn.commit()
         return id
@@ -300,7 +278,7 @@ def add_kinect(data):
                 shoulder_right, elbow_right, wrist_right, hand_right,
                 hip_left, knee_left, ankle_left, foot_left,
                 hip_right, knee_right, ankle_right, foot_right, spine_shoulder,
-                completness, instability
+                completeness, instability
             ) VALUES (
                 %s, %s, 
                 %s, %s, %s, %s,
@@ -336,7 +314,7 @@ def add_kinect(data):
             data.get("ankle_right"),
             data.get("foot_right"),
             data.get("spine_shoulder"),
-            data.get("completness"),
+            data.get("completeness"),
             data.get("instability"),
         )
 

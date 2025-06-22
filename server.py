@@ -28,7 +28,7 @@ def send_kinect():
 
 @app.route('/getCurrentExercise', methods=['GET'])
 def get_current_exercise():
-    user_id = request.args.get("user_id")
+    user_id = str(request.args.get("user_id"))
     exercise = current_exercises.get(user_id, -1)
     return jsonify({"current_exercise" : exercise}), 200
 
@@ -36,10 +36,15 @@ def get_current_exercise():
 @app.route('/setCurrentExercise', methods=['POST'])
 def set_current_exercise():
     r = request.get_json()
-    user_id = r.get("user_id")
+    user_id = str(r.get("user_id"))
     exercise_id = r.get("exercise_id")
     set_id = r.get("set_id")
+    if exercise_id < 0:
+        current_exercises.pop(user_id,-1)
+        return jsonify({"message": "Exercise removed"}), 200
+    
     current_exercises[user_id] = {"exercise" : exercise_id, "set_id" : set_id}
+    print("Set exercise: ",user_id,current_exercises[user_id])
     return jsonify({"message" : "Exercise set"}), 200
 
 
@@ -141,22 +146,11 @@ def create_user():
         return jsonify({'error': 'Data insertion failed'}), 500
     
 
-@app.route('/createExercise', methods=['POST'])
-def create_exercise():
-    data = request.get_json()
-    if db.create_exercise(data):
-        return jsonify({'message': 'Exercise created successfully'}), 201
-    else:
-        return jsonify({'error': 'Data insertion failed'}), 500
-    
-
 @app.route('/createSession', methods=['POST'])
 def create_session():
     data = request.get_json()
     user_id = data.get("user_id")
-    start_time = data.get("start_time")
-    end_time = data.get("end_time")
-    id = db.create_session(user_id, start_time, end_time)
+    id = db.create_session(user_id)
     if id is not None:
         return jsonify({'id': id}), 201
     else:
@@ -168,8 +162,9 @@ def add_exercise():
     data = request.get_json()
     session_id = data.get("session_id")
     exercise_id = data.get("exercise_id")
-    date = data.get("date")
-    id = db.add_exercise(session_id, exercise_id, date)
+    reps = data.get("reps")
+    weight = data.get("weight")
+    id = db.add_exercise(session_id, exercise_id, reps, weight)
     if id is not None:
         return jsonify({'id': id}), 201
     else:
@@ -190,7 +185,6 @@ def set_metrics():
             return jsonify({'error': 'Data insertion failed'}), 500
     else:
         return jsonify({'error': 'Exercise not found'}), 500
-
 
 
 if __name__ == "__main__":

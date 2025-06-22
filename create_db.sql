@@ -78,7 +78,7 @@ CREATE TABLE IF NOT EXISTS kinect_data (
     ankle_right VARCHAR(100) NOT NULL,
     foot_right VARCHAR(100) NOT NULL,
     spine_shoulder VARCHAR(100) NOT NULL,
-    completness FLOAT NOT NULL,
+    completeness FLOAT NOT NULL,
     instability FLOAT NOT NULL
 );
 
