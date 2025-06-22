@@ -187,13 +187,13 @@ def create_user(username, password, user_type, other_data):
         conn.close()
 
 
-def create_session(user_id): #, start_time, end_time):
+def create_session(user_id):
     conn, cursor = connect()
     if not conn:
         return None
     try:
         query = sql.SQL("INSERT INTO sessions(user_id) VALUES (%s) RETURNING id")
-        cursor.execute(query, (user_id)) #, start_time, end_time
+        cursor.execute(query, (user_id))
         id = cursor.fetchone()[0]
         conn.commit()
         return id
@@ -204,6 +204,21 @@ def create_session(user_id): #, start_time, end_time):
         cursor.close()
         conn.close()
 
+def finish_session(session_id):
+    conn, cursor = connect()
+    if not conn:
+        return False
+    try:
+        query = sql.SQL("UPDATE sessions SET end_time = CURRENT_TIMESTAMP WHERE id = %s")
+        cursor.execute(query, (session_id,))
+        conn.commit()
+        return cursor.rowcount > 0  # True if a row was updated
+    except Exception as e:
+        print(f"Error finishing session: {e}")
+        return False
+    finally:
+        cursor.close()
+        conn.close()
 
 def add_exercise(session_id, exercise_id, reps, weight):
     conn, cursor = connect()

@@ -155,7 +155,17 @@ def create_session():
         return jsonify({'id': id}), 201
     else:
         return jsonify({'error': 'Data insertion failed'}), 500
+
+@app.route('/finishSession', methods=['POST'])
+def finish_session_route():
+    data = request.get_json()
+    session_id = data.get("session_id")
     
+    success = db.finish_session(session_id)
+    if success:
+        return jsonify({'message': 'Session finished successfully'}), 200
+    else:
+        return jsonify({'error': 'Failed to finish session'}), 500
 
 @app.route('/addExercise', methods=["POST"])
 def add_exercise():
