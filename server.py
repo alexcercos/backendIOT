@@ -189,7 +189,8 @@ def set_metrics():
     if len(data) > 0:
         mean_hr = sum(d["heart_rate"] for d in data) / len(data)
         mean_br = sum(d["breath_rate"] for d in data) / len(data)
-        if db.set_metrics(set_id, mean_hr, mean_br):
+        duration = max(d["ts"] for d in data) - min(d["ts"] for d in data)
+        if db.set_metrics(set_id, mean_hr, mean_br, duration):
             return jsonify({'message': 'Metrics set successfully'}), 201
         else:
             return jsonify({'error': 'Data insertion failed'}), 500

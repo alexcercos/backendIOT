@@ -352,13 +352,13 @@ def add_kinect(data):
         conn.close()
 
 
-def set_metrics(set_id, mean_hr, mean_br):
+def set_metrics(set_id, mean_hr, mean_br, duration):
     conn, cursor = connect()
     if not conn:
         return None
     try:
-        query = sql.SQL("UPDATE sets SET mean_heart_rate = %s, mean_breath_rate = %s WHERE id = %s")
-        cursor.execute(query, (mean_hr, mean_br, set_id))
+        query = sql.SQL("UPDATE sets SET mean_heart_rate = %s, mean_breath_rate = %s, duration = %s WHERE id = %s")
+        cursor.execute(query, (mean_hr, mean_br, duration, set_id))
         conn.commit()
         return True
     except Exception as e:
