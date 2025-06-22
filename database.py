@@ -115,7 +115,15 @@ def get_sets(session):
     if not conn:
         return None
     try:
-        query = sql.SQL("SELECT * FROM sets WHERE session_id = %s")
+        query = sql.SQL("""
+            SELECT 
+                sets.*, 
+                exercise.name AS exercise_name, 
+                exercise.description AS exercise_desc
+            FROM sets
+            JOIN exercise ON sets.exercise_id = exercise.id
+            WHERE sets.session_id = %s
+        """)
         cursor.execute(query, (session,))
         columns = [desc[0] for desc in cursor.description]
         result = [dict(zip(columns, row)) for row in cursor.fetchall()]
