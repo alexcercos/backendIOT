@@ -197,6 +197,21 @@ def set_metrics():
     else:
         return jsonify({'error': 'Exercise not found'}), 500
 
+@app.route('/getSetSummary', methods=['GET'])
+def get_set_summary():
+    set_id = request.args.get("set_id")
+    poxdata = db.get_set_graphs_pox(set_id)
+    kinectdata = db.get_set_graphs_kinect(set_id)
+
+    data = {
+        "pox": poxdata,
+        "kinect": kinectdata
+    }
+
+    if data:
+        return jsonify(data), 200
+    else:
+        return jsonify({'error': 'Database query failed'}), 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True)

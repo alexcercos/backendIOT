@@ -351,6 +351,39 @@ def add_kinect(data):
         cursor.close()
         conn.close()
 
+def get_set_graphs_pox(set_id):
+    conn, cursor = connect()
+    if not conn:
+        return None
+    try:
+        query = sql.SQL("SELECT ts,heart_rate,breath_rate FROM pox_data WHERE set_id = %s")
+        cursor.execute(query, (set_id,))
+        columns = [desc[0] for desc in cursor.description]
+        result = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        return result
+    except Exception as e:
+        print(f"Error executing query: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
+def get_set_graphs_kinect(set_id):
+    conn, cursor = connect()
+    if not conn:
+        return None
+    try:
+        query = sql.SQL("SELECT ts,completeness,instability FROM kinect_data WHERE set_id = %s")
+        cursor.execute(query, (set_id,))
+        columns = [desc[0] for desc in cursor.description]
+        result = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        return result
+    except Exception as e:
+        print(f"Error executing query: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
 
 def set_metrics(set_id, mean_hr, mean_br, duration):
     conn, cursor = connect()
