@@ -384,6 +384,23 @@ def get_set_graphs_kinect(set_id):
     finally:
         cursor.close()
         conn.close()
+    
+def get_set_kinect_rep(set_id, min_ts):
+    conn, cursor = connect()
+    if not conn:
+        return None
+    try:
+        query = sql.SQL("SELECT ts,completeness FROM kinect_data WHERE set_id = %s AND ts > %s")
+        cursor.execute(query, (set_id,min_ts))
+        columns = [desc[0] for desc in cursor.description]
+        result = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        return result
+    except Exception as e:
+        print(f"Error executing query: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
 
 def set_metrics(set_id, mean_hr, mean_br, duration):
     conn, cursor = connect()

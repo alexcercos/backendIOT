@@ -213,5 +213,17 @@ def get_set_summary():
     else:
         return jsonify({'error': 'Database query failed'}), 500
 
+@app.route('/getLiveRepetition', methods=['GET'])
+def get_filtered_rep():
+    set_id = request.args.get("set_id")
+    ts = request.args.get("timestamp")
+    
+    data = db.get_set_kinect_rep(set_id, ts)
+
+    if data:
+        return jsonify(data), 200
+    else:
+        return jsonify({'error': 'Database query failed'}), 500
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True)
